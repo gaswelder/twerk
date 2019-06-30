@@ -37,7 +37,7 @@ func parseConfigNode(data json.RawMessage) (twerkable, error) {
 	t := new(twerk)
 	err := json.Unmarshal(data, &t)
 	if err == nil && t.Cmd != "" {
-		err = validateJSONKeys(data, []string{"cmd", "dir", "logPrefix", "initMessages", "env"})
+		err = validateJSONKeys(data, []string{"cmd", "desc", "dir", "logPrefix", "initMessages", "env"})
 		return t, err
 	}
 
@@ -45,7 +45,7 @@ func parseConfigNode(data json.RawMessage) (twerkable, error) {
 	c := newComposite()
 	err = json.Unmarshal(data, &c)
 	if err == nil && len(c.Compose) != 0 {
-		err = validateJSONKeys(data, []string{"compose"})
+		err = validateJSONKeys(data, []string{"compose", "desc"})
 		return c, err
 	}
 

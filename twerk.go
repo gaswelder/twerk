@@ -12,6 +12,7 @@ type twerk struct {
 	Cmd          string            `json:"cmd"`
 	InitMessages []string          `json:"initMessages"`
 	Env          map[string]string `json:"env"`
+	Desc         string            `json:"desc"`
 }
 
 // Converts an env var map to a list of "name=value" pairs.
@@ -44,6 +45,10 @@ func (t *twerk) start(name string, tt twerks) error {
 	redir.wait()
 	log.Printf("-------------------- " + name + " started ------------------------")
 	return nil
+}
+
+func (t *twerk) desc() string {
+	return t.Desc
 }
 
 type logSniffer struct {

@@ -5,6 +5,7 @@ import "log"
 // A group of twerks that is started in a specific sequence.
 type compositeTwerk struct {
 	Compose [][]string `json:"compose"`
+	Desc    string     `json:"desc"`
 }
 
 func newComposite() *compositeTwerk {
@@ -22,4 +23,8 @@ func (t compositeTwerk) start(name string, tt twerks) error {
 	}
 
 	return nil
+}
+
+func (t compositeTwerk) desc() string {
+	return t.Desc
 }

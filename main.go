@@ -7,6 +7,7 @@ import (
 
 type twerkable interface {
 	start(name string, t twerks) error
+	desc() string
 }
 
 type twerks map[string]twerkable
@@ -33,20 +34,32 @@ func main() {
 		os.Exit(1)
 	}
 
+	// If no arguments given, show the list of available commands.
+	if len(os.Args) == 1 {
+		help(cfg)
+		os.Exit(0)
+	}
+
 	if len(os.Args) > 2 {
 		fmt.Fprintf(os.Stderr, "usage: twerkgraf [taskname]\n")
 		os.Exit(1)
 	}
 
-	taskName := "default"
-	if len(os.Args) == 2 {
-		taskName = os.Args[1]
-	}
-
+	taskName := os.Args[1]
 	err = cfg.run(taskName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 	os.Exit(0)
+}
+
+func help(tt twerks) {
+	for name, t := range tt {
+		d := t.desc()
+		if d == "" {
+			continue
+		}
+		fmt.Printf("	%s	%s\n", name, d)
+	}
 }

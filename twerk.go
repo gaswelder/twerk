@@ -2,18 +2,30 @@ package main
 
 import (
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
 
 type twerk struct {
-	Dir          string   `json:"dir"`
-	Cmd          string   `json:"cmd"`
-	InitMessages []string `json:"initMessages"`
+	Dir          string            `json:"dir"`
+	Cmd          string            `json:"cmd"`
+	InitMessages []string          `json:"initMessages"`
+	Env          map[string]string `json:"env"`
+}
+
+// Converts an env var map to a list of "name=value" pairs.
+func envList(m map[string]string) []string {
+	list := make([]string, len(m))
+	for name, val := range m {
+		list = append(list, name+"="+val)
+	}
+	return list
 }
 
 func (t *twerk) start(name string, tt twerks) error {
 	cmd := exec.Command("sh", "-c", t.Cmd)
+	cmd.Env = append(os.Environ(), envList(t.Env)...)
 	cmd.Dir = t.Dir
 
 	// Copy all output to stdout with prefix

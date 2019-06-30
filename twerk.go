@@ -7,9 +7,9 @@ import (
 )
 
 type twerk struct {
-	Dir         string `json:"dir"`
-	Cmd         string `json:"cmd"`
-	InitMessage string `json:"initMessage"`
+	Dir          string   `json:"dir"`
+	Cmd          string   `json:"cmd"`
+	InitMessages []string `json:"initMessages"`
 }
 
 func (t *twerk) start(name string, tt twerks) error {
@@ -18,7 +18,7 @@ func (t *twerk) start(name string, tt twerks) error {
 
 	// Copy all output to stdout with prefix
 	logPrefix := name
-	redir := makeSniffer(logPrefix, t.InitMessage)
+	redir := makeSniffer(logPrefix, t.InitMessages)
 	cmd.Stderr = redir
 	cmd.Stdout = redir
 
@@ -35,7 +35,7 @@ func (t *twerk) start(name string, tt twerks) error {
 }
 
 type logSniffer struct {
-	startSentinel string
+	startSentinel map[string]bool
 	startChan     chan bool
 	prefix        string
 }
@@ -51,20 +51,41 @@ func (l *logSniffer) Write(p []byte) (n int, err error) {
 	lines := strings.Split(string(p), "\n")
 	for _, line := range lines {
 		log.Printf("%s\t%s", l.prefix, line)
-		if l.startChan != nil && strings.Index(line, l.startSentinel) >= 0 {
-			l.startChan <- true
-			l.startChan = nil
+
+		// Check if we need to track output messages
+		if l.startChan != nil {
+			l.checkSentinels(line)
 		}
 	}
 	return len(p), nil
 }
 
-func makeSniffer(prefix string, startSentinel string) *logSniffer {
+// Checks all sentinels that we expect and sends a signal
+// to the start channel once all sentinels have been received.
+func (l *logSniffer) checkSentinels(line string) {
+	for k := range l.startSentinel {
+		if strings.Index(line, k) < 0 {
+			continue
+		}
+		delete(l.startSentinel, k)
+		if len(l.startSentinel) == 0 {
+			l.startChan <- true
+			l.startChan = nil
+		}
+	}
+}
+
+func makeSniffer(prefix string, startSentinel []string) *logSniffer {
 	l := &logSniffer{
 		prefix: prefix,
 	}
-	if startSentinel != "" {
-		l.startSentinel = startSentinel
+	// If this twerk defines a list of output messages to wait for,
+	// copy them info a set for the sniffer.
+	if len(startSentinel) != 0 {
+		l.startSentinel = make(map[string]bool)
+		for _, line := range startSentinel {
+			l.startSentinel[line] = false
+		}
 		l.startChan = make(chan bool)
 	}
 	return l

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"os/exec"
@@ -13,6 +15,18 @@ type twerk struct {
 	InitMessages []string          `json:"initMessages"`
 	Env          map[string]string `json:"env"`
 	Desc         string            `json:"desc"`
+}
+
+func parseTwerk(data json.RawMessage) (*twerk, error) {
+	t := new(twerk)
+	err := json.Unmarshal(data, &t)
+	if err != nil {
+		return nil, err
+	}
+	if t.Cmd == "" {
+		return nil, errors.New("not a twerk: cmd field is missing")
+	}
+	return t, validateJSONKeys(data, []string{"cmd", "desc", "dir", "logPrefix", "initMessages", "env"})
 }
 
 // Converts an env var map to a list of "name=value" pairs.

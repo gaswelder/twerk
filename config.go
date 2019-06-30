@@ -34,18 +34,14 @@ func parseConfig(path string) (twerks, error) {
 
 func parseConfigNode(data json.RawMessage) (twerkable, error) {
 	// Is it a regular twerk?
-	t := new(twerk)
-	err := json.Unmarshal(data, &t)
-	if err == nil && t.Cmd != "" {
-		err = validateJSONKeys(data, []string{"cmd", "desc", "dir", "logPrefix", "initMessages", "env"})
+	t, err := parseTwerk(data)
+	if t != nil {
 		return t, err
 	}
 
 	// Is it a composite?
-	c := newComposite()
-	err = json.Unmarshal(data, &c)
-	if err == nil && len(c.Compose) != 0 {
-		err = validateJSONKeys(data, []string{"compose", "desc"})
+	c, err := parseComposite(data)
+	if c != nil {
 		return c, err
 	}
 

@@ -1,6 +1,10 @@
 package main
 
-import "log"
+import (
+	"encoding/json"
+	"errors"
+	"log"
+)
 
 // A group of twerks that is started in a specific sequence.
 type compositeTwerk struct {
@@ -8,8 +12,16 @@ type compositeTwerk struct {
 	Desc    string     `json:"desc"`
 }
 
-func newComposite() *compositeTwerk {
-	return &compositeTwerk{}
+func parseComposite(data json.RawMessage) (*compositeTwerk, error) {
+	c := &compositeTwerk{}
+	err := json.Unmarshal(data, &c)
+	if err != nil {
+		return nil, err
+	}
+	if len(c.Compose) == 0 {
+		return nil, errors.New("empty compose field")
+	}
+	return c, validateJSONKeys(data, []string{"compose", "desc"})
 }
 
 func (t compositeTwerk) start(name string, tt twerks) error {

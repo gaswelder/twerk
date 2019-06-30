@@ -44,7 +44,31 @@ func parseConfigNode(data json.RawMessage) (twerkable, error) {
 	t := new(twerk)
 	err = json.Unmarshal(data, &t)
 	if err == nil {
-		return t, nil
+		err = validateJSONKeys(data, []string{"cmd", "dir", "logPrefix", "initMessages"})
+		return t, err
 	}
 	return nil, errors.New("unrecognized node format")
+}
+
+func validateJSONKeys(data json.RawMessage, keys []string) error {
+	m := make(map[string]interface{})
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return err
+	}
+	for key := range m {
+		if !contains(keys, key) {
+			return fmt.Errorf("unknown field: %s", key)
+		}
+	}
+	return nil
+}
+
+func contains(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

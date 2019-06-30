@@ -33,7 +33,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = cfg.run("default")
+	if len(os.Args) > 2 {
+		fmt.Fprintf(os.Stderr, "usage: twerkgraf [taskname]\n")
+		os.Exit(1)
+	}
+
+	taskName := "default"
+	if len(os.Args) == 2 {
+		taskName = os.Args[1]
+	}
+
+	err = cfg.run(taskName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)

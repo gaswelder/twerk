@@ -12,11 +12,17 @@ type twerkable interface {
 type twerks map[string]twerkable
 
 func (tt twerks) run(name string) error {
-	tt.start(name)
+	err := tt.start(name)
+	if err != nil {
+		return err
+	}
 	select {}
 }
 
 func (tt twerks) start(name string) error {
+	if tt[name] == nil {
+		return fmt.Errorf("twerk %s is not defined", name)
+	}
 	return tt[name].start(name, tt)
 }
 

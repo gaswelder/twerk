@@ -10,6 +10,8 @@ import (
 type compositeTwerk struct {
 	Compose [][]string `json:"compose"`
 	Desc    string     `json:"desc"`
+
+	end chan error
 }
 
 func parseComposite(data json.RawMessage) (*compositeTwerk, error) {
@@ -25,18 +27,41 @@ func parseComposite(data json.RawMessage) (*compositeTwerk, error) {
 }
 
 func (t compositeTwerk) start(name string, tt twerks) error {
+	if t.end != nil {
+		return errors.New("non-nil end channel")
+	}
+
+	subtwerks := make([]string, 0)
 	for _, group := range t.Compose {
 		for _, name := range group {
 			err := tt.start(name)
 			if err != nil {
 				log.Fatalf("failed to start %s: %v", name, err)
 			}
+			subtwerks = append(subtwerks, name)
 		}
 	}
+
+	t.end = make(chan error)
+	go func() {
+		var err error
+		for _, name := range subtwerks {
+			err = tt.wait(name)
+			if err != nil {
+				break
+			}
+		}
+		t.end <- err
+		t.end = nil
+	}()
 
 	return nil
 }
 
 func (t compositeTwerk) desc() string {
 	return t.Desc
+}
+
+func (t compositeTwerk) wait() error {
+	return <-t.end
 }

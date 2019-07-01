@@ -12,7 +12,7 @@ func (tt twerks) run(name string) error {
 	if err != nil {
 		return err
 	}
-	select {}
+	return tt.wait(name)
 }
 
 func (tt twerks) start(name string) error {
@@ -20,6 +20,10 @@ func (tt twerks) start(name string) error {
 		return fmt.Errorf("twerk %s is not defined", name)
 	}
 	return tt[name].start(name, tt)
+}
+
+func (tt twerks) wait(name string) error {
+	return tt[name].wait()
 }
 
 func main() {

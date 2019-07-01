@@ -14,6 +14,8 @@ type twerk struct {
 	InitMessages []string          `json:"initMessages"`
 	Env          map[string]string `json:"env"`
 	Desc         string            `json:"desc"`
+
+	end chan error
 }
 
 func parseTwerk(data json.RawMessage) (*twerk, error) {
@@ -38,6 +40,11 @@ func envList(m map[string]string) []string {
 }
 
 func (t *twerk) start(name string, tt twerks) error {
+	if t.end != nil {
+		return errors.New("end channel already exists")
+	}
+	t.end = make(chan error, 0)
+
 	cmd := exec.Command("sh", "-c", t.Cmd)
 	cmd.Env = append(os.Environ(), envList(t.Env)...)
 	cmd.Dir = t.Dir
@@ -52,6 +59,8 @@ func (t *twerk) start(name string, tt twerks) error {
 	go func() {
 		err := cmd.Run()
 		log.Printf("%v exited: %v", name, err)
+		t.end <- err
+		t.end = nil
 	}()
 
 	// Wait for the sentinel on the channel
@@ -62,4 +71,8 @@ func (t *twerk) start(name string, tt twerks) error {
 
 func (t *twerk) desc() string {
 	return t.Desc
+}
+
+func (t *twerk) wait() error {
+	return <-t.end
 }

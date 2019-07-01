@@ -5,11 +5,6 @@ import (
 	"os"
 )
 
-type twerkable interface {
-	start(name string, t twerks) error
-	desc() string
-}
-
 type twerks map[string]twerkable
 
 func (tt twerks) run(name string) error {

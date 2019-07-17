@@ -11,7 +11,8 @@ type logSniffer struct {
 	prefix        string
 }
 
-func (l *logSniffer) wait() {
+// Blocks until all log sentines have been encountered.
+func (l *logSniffer) waitForSentinels() {
 	if l.startChan == nil {
 		return
 	}

@@ -40,6 +40,7 @@ func envList(m map[string]string) []string {
 }
 
 func (t *twerk) start(name string, tt twerks) error {
+	log.Printf("-------------------- starting " + name + " ------------------------")
 	if t.end != nil {
 		return errors.New("end channel already exists")
 	}
@@ -51,9 +52,9 @@ func (t *twerk) start(name string, tt twerks) error {
 
 	// Copy all output to stdout with prefix
 	logPrefix := name
-	redir := makeSniffer(logPrefix, t.InitMessages)
-	cmd.Stderr = redir
-	cmd.Stdout = redir
+	logger := makeSniffer(logPrefix, t.InitMessages)
+	cmd.Stderr = logger
+	cmd.Stdout = logger
 
 	// Start the process
 	go func() {
@@ -64,7 +65,7 @@ func (t *twerk) start(name string, tt twerks) error {
 	}()
 
 	// Wait for the sentinel on the channel
-	redir.wait()
+	logger.waitForSentinels()
 	log.Printf("-------------------- " + name + " started ------------------------")
 	return nil
 }

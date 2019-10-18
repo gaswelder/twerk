@@ -11,11 +11,14 @@ type compositeTwerk struct {
 	Compose [][]string `json:"compose"`
 	Desc    string     `json:"desc"`
 
-	end chan error
+	twerksTable *twerks
+	end         chan error
 }
 
-func parseComposite(data json.RawMessage) (*compositeTwerk, error) {
-	c := &compositeTwerk{}
+func parseComposite(data json.RawMessage, tt *twerks) (*compositeTwerk, error) {
+	c := &compositeTwerk{
+		twerksTable: tt,
+	}
 	err := json.Unmarshal(data, &c)
 	if err != nil {
 		return nil, err
@@ -26,7 +29,7 @@ func parseComposite(data json.RawMessage) (*compositeTwerk, error) {
 	return c, validateJSONKeys(data, []string{"compose", "desc"})
 }
 
-func (t compositeTwerk) start(name string, tt twerks) error {
+func (t compositeTwerk) start(name string) error {
 	if t.end != nil {
 		return errors.New("non-nil end channel")
 	}
@@ -34,7 +37,7 @@ func (t compositeTwerk) start(name string, tt twerks) error {
 	subtwerks := make([]string, 0)
 	for _, group := range t.Compose {
 		for _, name := range group {
-			err := tt.start(name)
+			err := t.twerksTable.start(name)
 			if err != nil {
 				log.Fatalf("failed to start %s: %v", name, err)
 			}
@@ -46,7 +49,7 @@ func (t compositeTwerk) start(name string, tt twerks) error {
 	go func() {
 		var err error
 		for _, name := range subtwerks {
-			err = tt.wait(name)
+			err = t.twerksTable.wait(name)
 			if err != nil {
 				break
 			}

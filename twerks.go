@@ -16,7 +16,7 @@ func (tt twerks) start(name string) error {
 	if tt[name] == nil {
 		return fmt.Errorf("twerk %s is not defined", name)
 	}
-	return tt[name].start(name, tt)
+	return tt[name].start(name)
 }
 
 func (tt twerks) wait(name string) error {

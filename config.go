@@ -22,7 +22,7 @@ func parseConfig(path string) (twerks, error) {
 
 	cfg := make(twerks)
 	for name, data := range kv {
-		t, err := parseConfigNode(data)
+		t, err := parseConfigNode(data, &cfg)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse twerks[%v]: %v", name, err)
 		}
@@ -32,7 +32,7 @@ func parseConfig(path string) (twerks, error) {
 	return cfg, nil
 }
 
-func parseConfigNode(data json.RawMessage) (twerkable, error) {
+func parseConfigNode(data json.RawMessage, tt *twerks) (twerkable, error) {
 	// Is it a regular twerk?
 	t, err := parseTwerk(data)
 	if t != nil {
@@ -40,7 +40,7 @@ func parseConfigNode(data json.RawMessage) (twerkable, error) {
 	}
 
 	// Is it a composite?
-	c, err := parseComposite(data)
+	c, err := parseComposite(data, tt)
 	if c != nil {
 		return c, err
 	}

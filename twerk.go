@@ -39,7 +39,7 @@ func envList(m map[string]string) []string {
 	return list
 }
 
-func (t *twerk) start(name string, tt twerks) error {
+func (t *twerk) start(name string) error {
 	log.Printf("-------------------- starting " + name + " ------------------------")
 	if t.end != nil {
 		return errors.New("end channel already exists")

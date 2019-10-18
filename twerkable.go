@@ -6,7 +6,7 @@ type twerkable interface {
 	desc() string
 
 	// start starts the task.
-	start(name string, t twerks) error
+	start(name string) error
 
 	// wait blocks until the task finishes.
 	wait() error

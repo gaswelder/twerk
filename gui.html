@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Twerking</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      class Term {
+        constructor(container) {
+          this.container = container;
+        }
+
+        log(msg) {
+          this.container.innerHTML += msg + "<br>";
+        }
+      }
+
+      const term = new Term(document.getElementById("root"));
+      const ws = new WebSocket("ws://localhost:8080/s");
+      ws.addEventListener("message", function(message) {
+        term.log(message.data);
+      });
+    </script>
+  </body>
+</html>

@@ -18,6 +18,11 @@ func main() {
 		os.Exit(0)
 	}
 
+	if len(os.Args) == 2 && os.Args[1] == "gui" {
+		runGUI()
+		os.Exit(0)
+	}
+
 	if len(os.Args) > 2 {
 		fmt.Fprintf(os.Stderr, "usage: twerkgraf [taskname]\n")
 		os.Exit(1)

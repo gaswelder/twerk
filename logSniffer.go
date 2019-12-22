@@ -22,6 +22,9 @@ func (l *logSniffer) waitForSentinels() {
 func (l *logSniffer) Write(p []byte) (n int, err error) {
 	lines := strings.Split(string(p), "\n")
 	for _, line := range lines {
+		if strings.TrimRight(line, "\r\n") == "" {
+			continue
+		}
 		log.Printf("%s\t%s", l.prefix, line)
 
 		// Check if we need to track output messages

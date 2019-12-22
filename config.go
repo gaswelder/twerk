@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 )
@@ -34,18 +33,18 @@ func parseConfig(path string) (twerks, error) {
 
 func parseConfigNode(data json.RawMessage, tt *twerks) (twerkable, error) {
 	// Is it a regular twerk?
-	t, err := parseTwerk(data)
+	t, err1 := parseTwerk(data)
 	if t != nil {
-		return t, err
+		return t, err1
 	}
 
 	// Is it a composite?
-	c, err := parseComposite(data, tt)
+	c, err2 := parseComposite(data, tt)
 	if c != nil {
-		return c, err
+		return c, err2
 	}
 
-	return nil, errors.New("unrecognized node format")
+	return nil, fmt.Errorf("unrecognized node format (twerk: %v, composite: %v)", err1, err2)
 }
 
 func validateJSONKeys(data json.RawMessage, keys []string) error {

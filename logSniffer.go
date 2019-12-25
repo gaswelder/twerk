@@ -9,6 +9,7 @@ type logSniffer struct {
 	startSentinel map[string]bool
 	startChan     chan bool
 	prefix        string
+	color         int
 }
 
 // Blocks until all log sentines have been encountered.
@@ -25,7 +26,7 @@ func (l *logSniffer) Write(p []byte) (n int, err error) {
 		if strings.TrimRight(line, "\r\n") == "" {
 			continue
 		}
-		log.Printf("%s\t%s", l.prefix, line)
+		log.Printf("%s\t%s", colorize(l.prefix, l.color), line)
 
 		// Check if we need to track output messages
 		if l.startChan != nil {
@@ -53,7 +54,9 @@ func (l *logSniffer) checkSentinels(line string) {
 func makeSniffer(prefix string, startSentinel []string) *logSniffer {
 	l := &logSniffer{
 		prefix: prefix,
+		color:  nextColor(),
 	}
+
 	// If this twerk defines a list of output messages to wait for,
 	// copy them info a set for the sniffer.
 	if len(startSentinel) != 0 {
